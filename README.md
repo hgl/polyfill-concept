@@ -5,7 +5,7 @@ Proof of concept on how a feature detection library and conditional polyfill cod
 ## Usage
 
 - Open `index.html` in your browser to see the tailored polyfill code.
-- Open in different browsers to see different polyfills.
+- Open in different browsers to see different polyfills. (e.g., at the time of writing, chrome contains a broken `Element::classList.toggle` method, so its polyfilled. Firefox does it correctly, so no polyfill.)
 
 ## Caveats
 
