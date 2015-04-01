@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Polyfill Concept</title>
+	<style>
+		pre {
+			width: 300px;
+			word-wrap: break-word;
+		}
+	</style>
+</head>
+<body>
+	<p>This browser need the following polyfills:</p>
+	<pre id="output">Loading...</pre>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+	<script src="feature-detection.js"></script>
+	<script type="polyfill" id="polyfill">
+	if (!support) {
+		window["DOMTokenList"] = DOMTokenListShim;
+		Object.defineProperty(Element.prototype, "classList", {
+			enumerable: true,
+			configurable: true,
+			get: function get() {
+				return new DOMTokenListShim(this);
+			},
+			set: function set() {}
+		});
+	} else {
+		var proto = DOMTokenList.prototype;
+		if (!support.multipleArguments) {
+			Object.defineProperties(proto, {
+				add: {
+					writable: true,
+					configurable: true,
+					value: patchMultipleArguments(proto.add)
+				},
+				remove: {
+					writable: true,
+					configurable: true,
+					value: patchMultipleArguments(proto.remove)
+				}
+			});
+		}
+		if (!support.toggleForceArgument) {
+			Object.defineProperty(proto, "toggle", {
+				writable: true,
+				configurable: true,
+				value: patchToggle(proto.toggle)
+			});
+		}
+	}
+
+	function patchMultipleArguments(method) {
+		return function () {
+			var i = 0;
+			while (i < arguments.length) {
+				method.call(this, arguments[i++]);
+			}
+		};
+	}
+
+	function patchToggle(toggle) {
+		return function (token, force) {
+			if (force === undefined) {
+				return toggle.call(this, token);
+			}
+			if (force) {
+				this.add(token);
+			} else {
+				this.remove(token);
+			}
+			return force;
+		};
+	}
+	</script>
+	<script src="polyfills.js"></script>
+	<script src="compile.js"></script>
+</body>
+</html>
